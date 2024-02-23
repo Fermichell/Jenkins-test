@@ -4,13 +4,12 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Building the project'
-        sh 'mvn clean install'
+        sh 'python setup.py install'
       }
     }
     stage('Test') {
       steps {
         echo 'Testing the project'
-        sh 'mvn test'
         sh 'python -m unittest discover'
       }
     }

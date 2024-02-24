@@ -1,23 +1,34 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build') {
-      steps {
-        echo 'Building the project'
-        sh 'python setup.py install'
-      }
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Збірка') {
+            steps {
+                sh 'python3 setup.py build'
+            }
+        }
+        stage('Тестування') {
+            steps {
+                sh 'python3 -m unittest tests'
+            }
+        }
+        stage('Деплой на прод') {
+            steps {
+                sh 'scp dist/my_project.zip user@prod_server:/var/www/'
+                sh 'ssh user@prod_server "sudo unzip -o /var/www/my_project.zip -d /var/www/my_project"'
+                sh 'ssh user@prod_server "sudo systemctl restart nginx"'
+            }
+        }
     }
-    stage('Test') {
-      steps {
-        echo 'Testing the project'
-        sh 'python -m unittest discover'
-      }
+
+    post {
+        always {
+            cleanWs()
+        }
     }
-    stage('Deploy') {
-      steps {
-        echo 'Deploying the project'
-        sh 'python deploy.py'
-      }
-    }
-  }
 }
